@@ -178,6 +178,10 @@ void generate_inv(ProjectStore* store, Person* person_db, int person_count) {
 }
 
 void view_projects(ProjectStore* store) {
+    if ( store->root== NULL) {
+        printf("\nNo projects in the system.\n");
+        return;
+    }
     printf("\n-- All Projects (Sorted by ID) --\n");
     bst_print_all_recursive(store->root);
 

@@ -65,7 +65,6 @@ void display_project_invoice(ProjectStore* store, int project_id, Person* person
 void bst_print_all_recursive(ProjectBSTNode* node) {
     // Base case: if the node is NULL
     if (node == NULL) {
-        printf(">> No projects in the system.\n");
         return;
     }
 
