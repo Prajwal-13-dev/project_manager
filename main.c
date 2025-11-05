@@ -296,7 +296,7 @@ void handle_employee_menu(ProjectStore* store, Person* person_db, int person_cou
     }
 }
 
-// --- Memory Cleanup ---
+// Memory Cleanup
 
 static void bst_free_recursive(ProjectBSTNode* node) {
     if (node == NULL) {
