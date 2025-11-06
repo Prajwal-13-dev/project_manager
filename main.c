@@ -89,6 +89,7 @@ void initialize_employees(Person* person_db, int* person_count) {
         strncpy(person_db[*person_count].name, name_buffer, MAX_NAME_LEN - 1);
         person_db[*person_count].name[MAX_NAME_LEN - 1] = '\0';
         person_db[*person_count].workload = 0; 
+        person_db[*person_count].total_hours = 0.0f;
         
         (*person_count)++; 
     }
@@ -272,7 +273,7 @@ void do_log_hours(ProjectStore* store, Person* person_db, int person_count) {
         return;
     }
 
-    if (log_hours_to_project(project_to_log, person_id, hours) == 0) {
+    if (log_hours_to_project(project_to_log, person, hours) == 0) {
         printf("Success: Hours logged to project %d.\n", project_id);
     } else {
         printf(">> Error: Failed to log hours.\n");

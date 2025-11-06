@@ -21,7 +21,7 @@ int modify_project_details(Project* project, const char* new_name, const char* n
 
 Person* find_person(Person* person_db, int person_count, int person_id);
 int assign_project_to_person(ProjectStore* store, Person* person_db, int person_count);
-int log_hours_to_project(Project* project, int person_id, float hours);
+int log_hours_to_project(Project* project, Person* logging_person, float hours);
 
 
 void display_project_invoice(ProjectStore* store, int project_id, Person* person_db, int person_count);

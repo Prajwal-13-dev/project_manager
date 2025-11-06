@@ -34,6 +34,7 @@ typedef struct Person {
     char name[MAX_NAME_LEN]; 
     int workload; 
     int assigned_projects[MAX_PROJECTS]; 
+    float total_hours;
 } Person;
 
 
