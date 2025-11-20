@@ -5,8 +5,25 @@
 #include <stdbool.h>
 
 
-void clear_input_buffer();
+int get_int_input(const char* prompt);
+float get_float_input(const char* prompt);
+void get_string_input(const char* prompt, char* strin);
+void initialize_employees(Person* person_db, int* person_count);
+void initialize_employees(Person* person_db, int* person_count);
 
+void do_create_project(ProjectStore* store, Person* person_db, int person_count);
+void modify_project(ProjectStore* store);
+void assign_project(ProjectStore* store, Person* person_db, int person_count);
+void delete_project(ProjectStore* store, Person* person_db, int person_count);
+void generate_inv(ProjectStore* store, Person* person_db, int person_count);
+void view_projects(ProjectStore* store);
+void handle_manager_menu(ProjectStore* store, Person* person_db, int person_count);
+void do_log_hours(ProjectStore* store, Person* person_db, int person_count);
+void handle_employee_menu(ProjectStore* store, Person* person_db, int person_count);
+
+// --- Memory Cleanup Functions 
+void bst_free_recursive(ProjectBSTNode* node);
+void pr_free(PriorityQueue* node);
 
 Project* bst_find(ProjectBSTNode* root, int project_id);
 void bst_print_all_recursive(ProjectBSTNode* node);
