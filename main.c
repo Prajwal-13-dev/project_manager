@@ -21,24 +21,40 @@ void clear_input_buffer() {
 
 int get_int_input(const char* prompt) {
     int value;
-    printf("%s", prompt);
-    while (scanf(" %d", &value) != 1) {
-        printf("Invalid input. Please enter a number: ");
-        clear_input_buffer();
+    
+    while (1) { 
+        printf("%s", prompt);
+        
+        if (scanf(" %d", &value) != 1) {
+            printf("Invalid input. Please enter a number.\n");
+            scanf("%*[^\n]"); scanf("%*c"); 
+        } 
+        else if (value <= 0) {
+            printf("Please enter a positive value (greater than 0).\n");
+        }
+        else {
+            return value; 
+        }
     }
-    return value;
 }
 
 float get_float_input(const char* prompt) {
     float value;
-    printf("%s", prompt);
-    while (scanf(" %f", &value) != 1) {
-        printf("Invalid input. Please enter a number (e.g., 150.75): ");
-        clear_input_buffer();
+    
+    while (1) { 
+        printf("%s", prompt);
+        if (scanf(" %f", &value) != 1) {
+            printf("Invalid input. Please enter a number (e.g., 150.75).\n");
+            scanf("%*[^\n]"); scanf("%*c");
+        }
+        else if (value <= 0.0f) {
+            printf("Please enter a positive value (greater than 0).\n");
+        }
+        else {
+            return value;
+        }
     }
-    return value;
 }
-
 
 void get_string_input(const char* prompt, char* strin) { 
     printf("%s", prompt);
