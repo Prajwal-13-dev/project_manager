@@ -27,6 +27,7 @@ static ProjectBSTNode* bst_insert(ProjectBSTNode* root, Project* project) {
     else if (project->id > root->project->id) 
         root->right = bst_insert(root->right, project);
     else {
+        
         root->project = project; 
     }
     return root;
@@ -83,7 +84,8 @@ int pq_enqueue(PriorityQueue** pq_head, Project* project) {
     return 0; 
 }
 
-int store_create_project(ProjectStore* store, int id, const char* name, const char* client, float rate, float est_hours, int priority) {
+
+int store_create_project(ProjectStore* store, int id, const char* name, const char* client, float rate, int priority, Task new_tasks[], int task_count, Person* person_db, int person_count) {
 
     if (!store) {
         return -1;
@@ -100,17 +102,22 @@ int store_create_project(ProjectStore* store, int id, const char* name, const ch
       return -1; 
     }
     
+    
     p->id = id;
     strncpy(p->name, name, MAX_NAME_LEN - 1);
     p->name[MAX_NAME_LEN - 1] = '\0';
     strncpy(p->client_name, client, MAX_NAME_LEN - 1);
     p->client_name[MAX_NAME_LEN - 1] = '\0';
     p->billing_rate = rate;
-    p->estimated_hours = est_hours;
     p->priority = priority;
     strncpy(p->status, "Pending", 19);
     p->status[19] = '\0';
-    p->assigned_person_id = -1;
+
+    p->task_count = task_count;
+    for (int i = 0; i < task_count; i++) {
+        p->tasks[i] = new_tasks[i]; 
+    }
+
     p->log_count = 0;
     
     // Add to BST
@@ -122,6 +129,8 @@ int store_create_project(ProjectStore* store, int id, const char* name, const ch
         free(p);
         return -1;
     } 
+    
+     
     
     store->size++;
     
@@ -138,7 +147,7 @@ int modify_project_details(Project* project, const char* new_name, const char* n
     strncpy(project->client_name, new_client_name, MAX_NAME_LEN - 1);
     project->client_name[MAX_NAME_LEN - 1] = '\0';
     project->billing_rate = new_rate;
-
+    
     
     return 0;
 }

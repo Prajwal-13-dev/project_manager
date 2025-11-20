@@ -7,12 +7,10 @@
 #include "project_structs.h" 
 #include "project.h"     
 /*
-CONSTRAINTS:
-1.One project assigned to one person only.
-2.A person can have multiple projects assigned, up to MAX_PROJECTS.
-3.Priority (lower number = higher priority).
-4.Employees must be registered before projects can be assigned.
-5.Empty String inputs are not allowed for names and client names.
+1. A person can have multiple projects assigned, up to MAX_PROJECTS. (Now: A person can have up to MAX_PROJECTS tasks assigned.)
+2. Priority (lower number = higher priority).
+3. Employees must be registered before projects can be assigned.
+4. Empty String inputs are not allowed for names and client names.
 */
 
 void clear_input_buffer() {
@@ -98,7 +96,8 @@ void initialize_employees(Person* person_db, int* person_count) {
 }
 
 
-void do_create_project(ProjectStore* store) {
+
+void do_create_project(ProjectStore* store, Person* person_db, int person_count) {
     int id = get_int_input("Enter Project ID: ");
     
     if (bst_find(store->root, id) != NULL) {
@@ -111,15 +110,41 @@ void do_create_project(ProjectStore* store) {
     get_string_input("Enter Project Name: ", name);
     get_string_input("Enter Client Name: ", client);
     float rate = get_float_input("Enter Billing Rate (e.g., 100.50): ");
-    float hours = get_float_input("Enter Estimated Hours: ");
     int priority = get_int_input("Enter Priority (1-10, 1 is highest): ");
+    int task_count = 0;
+    do{
+        task_count = get_int_input("Enter the number of tasks for this project (1 to MAX_TASKS): ");
+        if (task_count <= 0 || task_count > MAX_TASKS) {
+            printf("Please enter a number between 1 and %d.\n", MAX_TASKS);
+        }
+    }
+    while(task_count > MAX_TASKS);
 
-    if (store_create_project(store, id, name, client, rate, hours, priority) == 0) {
-        printf("Success: Project '%s' (ID: %d) created and added to queue.\n", name, id);
+
+    Task new_tasks[MAX_TASKS];
+    printf("\n---Task Details---\n");
+    for (int i = 0; i < task_count; i++) {
+        printf("Task %d:\n", i + 1);
+        char task_name[MAX_NAME_LEN];
+        get_string_input("  Enter Task Name: ", task_name);
+
+        // Initialize Task struct
+        new_tasks[i].id = i + 1;
+        strncpy(new_tasks[i].name, task_name, MAX_NAME_LEN - 1);
+        new_tasks[i].name[MAX_NAME_LEN - 1] = '\0';
+        strncpy(new_tasks[i].status, "Pending", 19);
+        new_tasks[i].status[19] = '\0';
+        new_tasks[i].assigned_person_id = -1; 
+    }
+
+    
+    if (store_create_project(store, id, name, client, rate, priority, new_tasks, task_count, person_db, person_count) == 0) {
+        printf("Success: Project '%s' (ID: %d) created, tasks initialized\n", name, id);
     } else {
-        printf(">> Error: Failed to create project (memory issue or duplicate ID).\n");
+        printf(">> Error: Failed to create project(memory issue or duplicate ID).\n");
     }
 }
+
 
 void modify_project(ProjectStore* store) {
     int id = get_int_input("Enter Project ID to modify: ");
@@ -149,11 +174,12 @@ void modify_project(ProjectStore* store) {
 }
 
 
+
 void assign_project(ProjectStore* store, Person* person_db, int person_count) {
-    printf("Assigning Next Pending Project \n");
+    printf("Assigning Next Pending Task (Highest Priority Task)\n");
 
     if (assign_project_to_person(store, person_db, person_count) != 0) {
-        printf(">> Assignment failed.\n");
+        printf(">> Task assignment failed.\n");
     }
 }
 
@@ -194,7 +220,7 @@ void handle_manager_menu(ProjectStore* store, Person* person_db, int person_coun
         printf("\n:::Manager Menu:::\n");
         printf(" 1. Create Project\n");
         printf(" 2. Modify Project\n");
-        printf(" 3. Assign Next Pending Project (by Priority)\n");
+        printf(" 3. Assign Next Pending Project (by Priority)\n"); 
         printf(" 4. Delete Project\n");
         printf(" 5. Generate Project Invoice\n");
         printf(" 6. View All Projects\n");
@@ -203,8 +229,7 @@ void handle_manager_menu(ProjectStore* store, Person* person_db, int person_coun
         printf("\nChoice selected: %d\n", choice);
         switch (choice) {
             case 1:
-
-                do_create_project(store);
+                do_create_project(store, person_db, person_count);
                 break;
             case 2:
                 modify_project(store);
@@ -231,7 +256,7 @@ void handle_manager_menu(ProjectStore* store, Person* person_db, int person_coun
 }
 
 void do_log_hours(ProjectStore* store, Person* person_db, int person_count) {
-    printf("Log Hours to Project\n");
+    printf("Log Hours to Task\n");
     
     int person_id = get_int_input("Enter your Employee ID: ");
     Person* person = find_person(person_db, person_count, person_id);
@@ -242,49 +267,76 @@ void do_log_hours(ProjectStore* store, Person* person_db, int person_count) {
     printf("Welcome, %s.\n", person->name);
 
     if (person->workload == 0) {
-        printf(">> You have no projects assigned.\n");
+        printf(">> You have no tasks assigned.\n");
         return;
     }
 
-    printf("Your assigned projects:\n");
+    printf("Your assigned tasks :\n" );
     for (int i = 0; i < person->workload; i++) {
-        int proj_id = person->assigned_projects[i];
+        int proj_id = person->assigned_projects[i]; 
         Project* proj = bst_find(store->root, proj_id);
         if (proj) {
-            printf(" ID: %d | Name: %s | Status: %s\n", proj->id, proj->name, proj->status);
+            printf(" Assigned Project ID: %d (Task details currently unavailable)\n", proj_id);
         }
     }
 
-    int project_id = get_int_input("Enter Project ID to log hours for: ");
+    int project_id = get_int_input("Enter Project ID to log hours for:");
     Project* project_to_log = bst_find(store->root, project_id);
 
     if (project_to_log == NULL) {
         printf(">> Error: Project ID %d not found.\n", project_id);
         return;
     }
-    if (project_to_log->assigned_person_id != person->id) {
-         printf(">> Error: Project %d is not assigned to you.\n", project_id);
+    
+    // Display Tasks for selection
+    printf("\nTasks in Project %d:\n", project_id);
+    for (int i = 0; i < project_to_log->task_count; i++) {
+        Task* task = &project_to_log->tasks[i];
+        if (task->assigned_person_id == person->id) {
+            printf(" Task ID: %d | Name: %s | Status: %s (Assigned to you)\n", 
+                   task->id, task->name, task->status);
+    }
+}
+    
+    int task_id = get_int_input("Enter Task ID to log hours for: ");
+    Task* task = NULL;
+    for (int i = 0; i < project_to_log->task_count; i++) {
+        if (project_to_log->tasks[i].id == task_id) {
+            task = &project_to_log->tasks[i];
+            break;
+        }
+    }
+
+
+    if (task == NULL) {
+        printf(">> Error: Task ID %d not found in Project %d.\n", task_id, project_id);
+        return;
+    }
+        if (task->assigned_person_id != person->id) {
+         printf(">> Error: Task %d is not assigned to you.\n", task_id);
          return;
     }
 
+
     float hours = get_float_input("Enter hours to log: ");
     if (hours <= 0) {
-        printf(">> Hours must be positive. No hours logged.\n");
+        printf(" Hours must be positive. No hours logged.\n");
         return;
     }
 
-    if (log_hours_to_project(project_to_log, person, hours) == 0) {
-        printf("Success: Hours logged to project %d.\n", project_id);
+    if (log_hours_to_project(project_to_log,task, person, hours) == 0) {
+        printf("Success: Hours logged to Task %d in Project %d.\n", task_id, project_id);
     } else {
         printf(">> Error: Failed to log hours.\n");
     }
 }
 
+
 void handle_employee_menu(ProjectStore* store, Person* person_db, int person_count) {
     int choice = 0;
     while (choice != 2) {
         printf("\n::: Employee Menu:::\n");
-        printf(" 1. Log Hours to Project\n");
+        printf(" 1. Log Hours to Task\n"); 
         printf(" 2. Exit (Back to Role Selection)\n");
         choice = get_int_input("Enter choice: ");
 
