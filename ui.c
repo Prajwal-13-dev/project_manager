@@ -5,6 +5,8 @@
 #include "project.h"
 
 
+
+
 static const char* get_person_name(int person_id, Person* person_db, int person_count) {
     for (int i = 0; i < person_count; i++) {
         if (person_db[i].id == person_id) {
@@ -141,56 +143,6 @@ void get_string_input(const char* prompt, char* strin) {
     printf("%s", prompt);
     scanf(" %s", strin);
 }
-
-void initialize_employees(Person* person_db, int* person_count) {
-    printf("===== Employee Setup =====\n");
-    
-    int n = 0;
-    while (n <= 0 || n > MAX_PERSONS) {
-        n = get_int_input("Enter the number of employees to register: ");
-        if (n <= 0 || n > MAX_PERSONS) {
-            printf("Please enter a number between 1 and %d.\n", MAX_PERSONS);
-        }
-    } 
-
-    while (*person_count < n) {
-        printf("Employee :%d    \n", *person_count + 1);
-        
-        int new_id;
-        bool duplicate;
-        
-        while (true) { 
-            new_id = get_int_input("Enter Employee ID: ");
-            duplicate = false;
-            
-            for (int i = 0; i < *person_count; i++) {
-                if (person_db[i].id == new_id) {
-                    printf("Error: Employee ID %d already exists. Please enter a different ID.\n", new_id);
-                    duplicate = true;
-                    break;
-                }
-            }
-            
-            if (!duplicate) {
-                break; 
-            }
-        }
-
-        char name_buffer[MAX_NAME_LEN];
-        get_string_input("Enter Employee Name: ", name_buffer);
-
-        person_db[*person_count].id = new_id;
-        strncpy(person_db[*person_count].name, name_buffer, MAX_NAME_LEN - 1);
-        person_db[*person_count].name[MAX_NAME_LEN - 1] = '\0';
-        person_db[*person_count].workload = 0; 
-        person_db[*person_count].total_hours = 0.0f;
-        
-        (*person_count)++; 
-    }
-    
-    printf(" Employee setup complete.\n");
-}
-
 
 
 void do_create_project(ProjectStore* store, Person* person_db, int person_count) {

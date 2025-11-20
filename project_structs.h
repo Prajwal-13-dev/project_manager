@@ -6,11 +6,11 @@
 #include <string.h>
 #include <stdbool.h> 
 
-#define MAX_PERSONS 50   // Max employees in the system
+
 #define MAX_NAME_LEN 50 // Max length for names 
 #define MAX_PROJECTS 20  // Max projects assignable to one person 
 #define MAX_TASKS 20     
-
+ 
 typedef struct WorkLog {
     int person_id;
     float hours;
